@@ -1,5 +1,5 @@
 import requests
-from typing import overload
+from typing import overload, Union
 # TODO https://github.com/jmorganca/ollama/blob/main/docs/api.md
 
 class ollama:
@@ -30,7 +30,7 @@ class ollama:
 
     # Generate a completion
     @overload
-    def generate(self, prompt:str)->str:
+    def generate(self, prompt:str)->Union[str, None]:
         """
         Generates a completion from a string using the model specified.\n
         `prompt` : a string, typically a question, used to generate the response.\n
@@ -54,7 +54,7 @@ class ollama:
             return
     
     @overload
-    def generate(self, prompt:str, model:str)->str:
+    def generate(self, prompt:str, model:str)->Union[str, None]:
         """
         Sets the object's model and generates a completion from a string using the model specified.\n
         `prompt` : a string, typically a question, used to generate the response.\n
@@ -66,19 +66,20 @@ class ollama:
 
     # Create a Model
     # need to know if possible when not running locally
-    def createModel(self, model:str, path:str)->None:
+    def createModel(self, model:str, path:str)->bool:
         """
         Create a model on the ollama server (if running locally) using a Modelfile.
         """
         try:
             parameters = {'name':model, "path":path}
             requests.post(f'http://{self.ip}:{str(self.port)}/api/create', json=parameters)
+            return True
         except:
             print("Error: Could not connect to ollama server")
-            return
+            return False
 
     # List Local Models
-    def listLocalModels(self)->list:
+    def listLocalModels(self)->Union[dict, None]:
         """
         List all the models on the ollama server.
         """
@@ -90,7 +91,7 @@ class ollama:
             return
 
     # Show Model Information
-    def showModelInfo(self, model:str)->dict:
+    def showModelInfo(self, model:str)->Union[dict, None]:
         """Show details about a model including modelfile, template, parameters, license and system prompt."""
         try:
             parameters = {'name':model}
@@ -101,28 +102,30 @@ class ollama:
             return
 
     # Delete a Model
-    def deleteModel(self, model:str)->None:
+    def deleteModel(self, model:str)->bool:
         """
         Delete a model from the ollama server.
         """
         try:
             parameters = {'name':model}
             requests.delete(f'http://{self.ip}:{str(self.port)}/api/delete', json=parameters)
+            return True
         except:
             print("Error: Could not connect to ollama server")
-            return
+            return False
 
     # Pull a Model
-    def __pull(self)->None:
+    def __pull(self)->bool:
         """
         Pull a model onto the ollama server.
         """
         try:
             parameters = {'name':self.model}
             requests.post(f'http://{self.ip}:{str(self.port)}/api/pull', json=parameters)
+            return True
         except:
             print("Error: Could not connect to ollama server")
-            return
+            return False
 
     def setModel(self, model:str)->None:
         """
@@ -132,7 +135,7 @@ class ollama:
         self.__pull()
 
     # Push a Model
-    def pushModel(self, model:str)->None:
+    def pushModel(self, model:str)->bool:
         """
         Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
         `model` : The name of the model to push.
@@ -140,9 +143,10 @@ class ollama:
         try:
             parameters = {'name':model}
             requests.post(f'http://{self.ip}:{str(self.port)}/api/push', json=parameters)
+            return True
         except:
             print("Error: Could not connect to ollama server")
-            return
+            return False
 
 
     # Generate Embeddings
