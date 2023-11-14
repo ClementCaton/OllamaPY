@@ -1,9 +1,14 @@
 import requests
-
+from typing import overload
+# TODO https://github.com/jmorganca/ollama/blob/main/docs/api.md
 
 class ollama:
     """
-    Instanciates a new [ollama](https://ollama.ai/) object.
+    Instanciates a new [ollama](https://ollama.ai/) object.\n
+    `ip` : The ip address of the ollama server. (localhost by default)\n
+    `port` : The port of the ollama server. (11434 by default)\n
+    `model` : The model name you want to use.\n
+    `options` : The options you want to use.\n
     """
     def __init__(self)-> None:
         self.ip = "127.0.0.1"
@@ -14,7 +19,7 @@ class ollama:
         """
         Define the port of the ollama server
         """
-        self.model = "llama2"
+        self.model = ""
         """
         Define the model name you want to use
         """
@@ -24,18 +29,12 @@ class ollama:
         """
 
     # Generate a completion
-    def generate(self, prompt:str, model:str)->str:
-        """
-        Sets the object's model and generates a completion from a string using the model specified.
-        """
-        self.setModel(model)
-        return self.generate(prompt)
-
+    @overload
     def generate(self, prompt:str)->str:
         """
-        Generate a completion from a string using the model specified in the ollama object.
+        Generates a completion from a string using the model specified.\n
+        `prompt` : a string, typically a question, used to generate the response.\n
         """
-
         answer = ''
         params = {'model': self.model, 'string': prompt, 'options': self.options}
         
@@ -53,9 +52,20 @@ class ollama:
         except:
             print("Error: Could not connect to ollama server")
             return
+    
+    @overload
+    def generate(self, prompt:str, model:str)->str:
+        """
+        Sets the object's model and generates a completion from a string using the model specified.\n
+        `prompt` : a string, typically a question, used to generate the response.\n
+        `model` : The model to use.\n
+        """
+        self.setModel(model)
+        return self.generate(prompt)
+
 
     # Create a Model
-        # need to know if possible when not running locally
+    # need to know if possible when not running locally
     def createModel(self, model:str, path:str)->None:
         """
         Create a model on the ollama server (if running locally) using a Modelfile.
@@ -122,4 +132,17 @@ class ollama:
         self.__pull()
 
     # Push a Model
+    def pushModel(self, model:str)->None:
+        """
+        Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
+        `model` : The name of the model to push.
+        """
+        try:
+            parameters = {'name':model}
+            requests.post(f'http://{self.ip}:{str(self.port)}/api/push', json=parameters)
+        except:
+            print("Error: Could not connect to ollama server")
+            return
+
+
     # Generate Embeddings
