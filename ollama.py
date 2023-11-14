@@ -55,8 +55,41 @@ class ollama:
             return
 
     # Create a Model
+        # need to know if possible when not running locally
+    def createModel(self, model:str, path:str)->None:
+        """
+        Create a model on the ollama server (if running locally) using a Modelfile.
+        """
+        try:
+            parameters = {'name':model, "path":path}
+            requests.post(f'http://{self.ip}:{str(self.port)}/api/create', json=parameters)
+        except:
+            print("Error: Could not connect to ollama server")
+            return
+
     # List Local Models
+    def listLocalModels(self)->list:
+        """
+        List all the models on the ollama server.
+        """
+        try:
+            r = requests.get(f'http://{self.ip}:{str(self.port)}/api/tags')
+            return r.json()
+        except:
+            print("Error: Could not connect to ollama server")
+            return
+
     # Show Model Information
+    def showModelInfo(self, model:str)->dict:
+        """Show details about a model including modelfile, template, parameters, license and system prompt."""
+        try:
+            parameters = {'name':model}
+            r = requests.get(f'http://{self.ip}:{str(self.port)}/api/info', json=parameters)
+            return r.json()
+        except:
+            print("Error: Could not connect to ollama server")
+            return
+
     # Delete a Model
     def deleteModel(self, model:str)->None:
         """
