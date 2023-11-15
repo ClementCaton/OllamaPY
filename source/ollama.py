@@ -29,40 +29,32 @@ class ollama:
         """
 
     # Generate a completion
-    @overload
-    def generate(self, prompt:str)->Union[str, None]:
+    def generate(self, prompt:str, model:str=None)->Union[str, None]:
         """
         Generates a completion from a string using the model specified.\n
         `prompt` : a string, typically a question, used to generate the response.\n
         """
+        if model != None:
+            self.setModel(model)
         answer = ''
-        params = {'model': self.model, 'string': prompt, 'options': self.options}
+        params = {'model': self.model, 'prompt': prompt}
         
         try:
-            r = requests.post(f"http://{self.ip}:{self.port}/generate", json=params, stream=True)
-            
+            r = requests.post(f'http://{self.ip}:{str(self.port)}/api/generate', json=params, stream=True)
             if r.status_code != 200:
                 print('Error:', r.status_code)
                 return
-            
-            for chunk in r.iter_content(chunk_size=None):
-                answer += chunk.decode('utf-8')
-            return answer
 
+            if r.encoding is None:
+                r.encoding = 'utf-8'
+            
+            for line in r.iter_content(decode_unicode=True):
+                if line:
+                    answer += line
+            return answer
         except:
             print("Error: Could not connect to ollama server")
             return
-    
-    @overload
-    def generate(self, prompt:str, model:str)->Union[str, None]:
-        """
-        Sets the object's model and generates a completion from a string using the model specified.\n
-        `prompt` : a string, typically a question, used to generate the response.\n
-        `model` : The model to use.\n
-        """
-        self.setModel(model)
-        return self.generate(prompt)
-
 
     # Create a Model
     # need to know if possible when not running locally
@@ -119,13 +111,17 @@ class ollama:
         """
         Pull a model onto the ollama server.
         """
-        try:
-            parameters = {'name':self.model}
-            requests.post(f'http://{self.ip}:{str(self.port)}/api/pull', json=parameters)
+        local = self.listLocalModels()
+        if self.model not in local:
+            try:
+                parameters = {'name':self.model}
+                requests.post(f'http://{self.ip}:{str(self.port)}/api/pull', json=parameters)
+                return True
+            except:
+                print("Error: Could not connect to ollama server")
+                return False
+        else:
             return True
-        except:
-            print("Error: Could not connect to ollama server")
-            return False
 
     def setModel(self, model:str)->None:
         """
