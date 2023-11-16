@@ -166,4 +166,3 @@ class Ollama:
         except:
             print("Error: Could not connect to ollama server")
         return
-        raise NotImplementedError
