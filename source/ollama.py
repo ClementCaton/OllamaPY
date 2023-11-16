@@ -1,8 +1,8 @@
 import requests
-from typing import overload, Union
+from typing import Union
 # TODO https://github.com/jmorganca/ollama/blob/main/docs/api.md
 
-class ollama:
+class Ollama:
     """
     Instanciates a new [ollama](https://ollama.ai/) object.\n
     `ip` : The ip address of the ollama server. (localhost by default)\n
@@ -28,6 +28,10 @@ class ollama:
         Define the options you want to use
         """
 
+    @property
+    def __baseUrl(self)->str:
+        return f"http://{self.ip}:{str(self.port)}/api"
+
     # Generate a completion
     def generate(self, prompt:str, model:str=None)->Union[str, None]:
         """
@@ -40,7 +44,7 @@ class ollama:
         params = {'model': self.model, 'prompt': prompt}
         
         try:
-            r = requests.post(f'http://{self.ip}:{str(self.port)}/api/generate', json=params, stream=True)
+            r = requests.post(f'{self.__baseUrl}/generate', json=params, stream=True)
             if r.status_code != 200:
                 print('Error:', r.status_code)
                 return
@@ -60,51 +64,63 @@ class ollama:
     # need to know if possible when not running locally
     def createModel(self, model:str, path:str)->bool:
         """
-        Create a model on the ollama server (if running locally) using a Modelfile.
+        Create a model on the ollama server (if running locally) using a Modelfile.\n
+        `model` : The name of the model to create.\n
+        `path` : The path to your Modelfile.\n
         """
+        raise NotImplementedError
         try:
             parameters = {'name':model, "path":path}
-            requests.post(f'http://{self.ip}:{str(self.port)}/api/create', json=parameters)
+            requests.post(f'{self.__baseUrl}/create', json=parameters)
             return True
         except:
             print("Error: Could not connect to ollama server")
             return False
 
     # List Local Models
-    def listLocalModels(self)->Union[dict, None]:
-        """
-        List all the models on the ollama server.
-        """
+    def listLocalModels(self)->Union[str, None]:
+        """List all the models on the ollama server."""
         try:
-            r = requests.get(f'http://{self.ip}:{str(self.port)}/api/tags')
+            r = requests.get(f'{self.__baseUrl}/tags')
             return r.json()
         except:
             print("Error: Could not connect to ollama server")
             return
 
     # Show Model Information
-    def showModelInfo(self, model:str)->Union[dict, None]:
+    def showModelInfo(self, model:str=None)->Union[dict, None]:
         """Show details about a model including modelfile, template, parameters, license and system prompt."""
         try:
+            if model == None:
+                model = self.model
             parameters = {'name':model}
-            r = requests.get(f'http://{self.ip}:{str(self.port)}/api/info', json=parameters)
-            return r.json()
+            r = requests.post(f'{self.__baseUrl}/show', json=parameters)
+            return r.content.decode("utf-8")
         except:
-            print("Error: Could not connect to ollama server")
+            print("Error: Could not get details about model")
             return
+            #TODO Fix this
 
     # Delete a Model
     def deleteModel(self, model:str)->bool:
         """
-        Delete a model from the ollama server.
+        Delete a model from the ollama server.\n
+        `model` : The exact name of the model to delete. Including ":version" if applicable.
         """
-        try:
-            parameters = {'name':model}
-            requests.delete(f'http://{self.ip}:{str(self.port)}/api/delete', json=parameters)
-            return True
-        except:
-            print("Error: Could not connect to ollama server")
-            return False
+
+
+        for _model in self.listLocalModels()['models']:
+            if _model['name'] == model:
+                try:
+                    parameters = {'name':model}
+                    requests.delete(f'{self.__baseUrl}/delete', json=parameters)
+                    return True
+                except:
+                    print("Error: Could not connect to ollama server")
+                    return False
+        print("Error: Model not found")
+        return False
+
 
     # Pull a Model
     def __pull(self)->bool:
@@ -112,10 +128,10 @@ class ollama:
         Pull a model onto the ollama server.
         """
         local = self.listLocalModels()
-        if self.model not in local:
+        if local == None or self.model not in local:
             try:
                 parameters = {'name':self.model}
-                requests.post(f'http://{self.ip}:{str(self.port)}/api/pull', json=parameters)
+                requests.post(f'{self.__baseUrl}/pull', json=parameters)
                 return True
             except:
                 print("Error: Could not connect to ollama server")
@@ -136,13 +152,25 @@ class ollama:
         Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
         `model` : The name of the model to push.
         """
-        try:
-            parameters = {'name':model}
-            requests.post(f'http://{self.ip}:{str(self.port)}/api/push', json=parameters)
-            return True
-        except:
-            print("Error: Could not connect to ollama server")
-            return False
-
+        raise NotImplementedError
 
     # Generate Embeddings
+    def embeddings(self, prompt:str, model:str=None, options:dict[str:any]=None):
+        """
+        Generate embeddings for a prompt using a model.\n
+        `prompt` : Text to generate embeddings for.\n
+        `model` : Name of model to generate embeddings from.\n
+        `options` : Additional model parameters listed in the documentation for the Modelfile such as temperature.
+        """
+        if model != None:
+            self.setModel(model)
+        if options == None:
+            options = {}
+        try:
+            parameters = {'model':self.model, 'prompt':prompt, 'options':options}
+            r = requests.post(f'{self.__baseUrl}/embeddings', json=parameters)
+            return r.content.decode("utf-8")
+        except:
+            print("Error: Could not connect to ollama server")
+        return
+        raise NotImplementedError
