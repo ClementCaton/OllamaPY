@@ -61,21 +61,14 @@ class Ollama:
             return
 
     # Create a Model
-    # need to know if possible when not running locally
     def createModel(self, model:str, path:str)->bool:
         """
+        # NOT IMPLEMENTED\n
         Create a model on the ollama server (if running locally) using a Modelfile.\n
         `model` : The name of the model to create.\n
         `path` : The path to your Modelfile.\n
         """
         raise NotImplementedError
-        try:
-            parameters = {'name':model, "path":path}
-            requests.post(f'{self.__baseUrl}/create', json=parameters)
-            return True
-        except:
-            print("Error: Could not connect to ollama server")
-            return False
 
     # List Local Models
     def listLocalModels(self)->Union[str, None]:
@@ -121,7 +114,6 @@ class Ollama:
         print("Error: Model not found")
         return False
 
-
     # Pull a Model
     def __pull(self)->bool:
         """
@@ -149,7 +141,8 @@ class Ollama:
     # Push a Model
     def pushModel(self, model:str)->bool:
         """
-        Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
+        # NOT IMPLEMENTED\n
+        Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.\n
         `model` : The name of the model to push.
         """
         raise NotImplementedError
