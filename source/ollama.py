@@ -64,6 +64,7 @@ class Ollama:
     def createModel(self, model:str, path:str)->bool:
         """
         # NOT IMPLEMENTED\n
+        Will be implemented, new version now supports OLLAMA_HOST\n
         Create a model on the ollama server (if running locally) using a Modelfile.\n
         `model` : The name of the model to create.\n
         `path` : The path to your Modelfile.\n
