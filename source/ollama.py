@@ -61,13 +61,11 @@ class Ollama:
             return
 
     # Create a Model
-    def createModel(self, model:str, path:str)->bool:
+    def createModel(self, modelname:str, modelfile:str)->bool:
         """
-        # NOT IMPLEMENTED\n
-        Will be implemented, new version now supports OLLAMA_HOST\n
-        Create a model on the ollama server (if running locally) using a Modelfile.\n
-        `model` : The name of the model to create.\n
-        `path` : The path to your Modelfile.\n
+        Create a model on the ollama server using a [Modelfile](https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md).\n
+        `modelName` : The name of the new model to create.\n
+        `modelfile` : The path to your Modelfile.\n
         """
         raise NotImplementedError
 
@@ -94,6 +92,14 @@ class Ollama:
             print("Error: Could not get details about model")
             return
             #TODO Fix this
+
+    #copy a model
+    def copyModel(self, modelInput:str, modelOutput:str)->bool:
+        """
+        # Forgot to implement\n
+        Copy a model. Creates a model with another name from an existing model.
+        """
+        raise NotImplementedError
 
     # Delete a Model
     def deleteModel(self, model:str)->bool:
@@ -149,7 +155,7 @@ class Ollama:
         raise NotImplementedError
 
     # Generate Embeddings
-    def embeddings(self, prompt:str, model:str=None, options:dict[str,any]=None):
+    def embeddings(self, prompt:str, model:str=None, options:dict[str,any]=None)->Union[str, None]:
         """
         Generate embeddings for a prompt using a model.\n
         `prompt` : Text to generate embeddings for.\n
