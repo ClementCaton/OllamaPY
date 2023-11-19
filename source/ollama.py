@@ -149,7 +149,7 @@ class Ollama:
         raise NotImplementedError
 
     # Generate Embeddings
-    def embeddings(self, prompt:str, model:str=None, options:dict[str:any]=None):
+    def embeddings(self, prompt:str, model:str=None, options:dict[str,any]=None):
         """
         Generate embeddings for a prompt using a model.\n
         `prompt` : Text to generate embeddings for.\n
