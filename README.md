@@ -1,7 +1,9 @@
 # OllamaPY
 
 OllamaPY is a Python library I did to use the Ollama API for my own projects. Feedback is appreciated.<br>
-It's an interface, so it requires you to have Ollama running on a machine. You can download it [here](https://ollama.ai/download).
+It's an interface, so it requires you to have Ollama running on a machine. You can download it [here](https://ollama.ai/download).<br>
+It works with Python 3.11.4 and Ollama 0.1.10.
+
 ## Documentation
 
 I copied parts of the documentation from the [Ollama API documentation](https://github.com/jmorganca/ollama/blob/main/docs/api.md) to describe the functions.
