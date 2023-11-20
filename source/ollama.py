@@ -1,6 +1,7 @@
 import requests
 from typing import Union
 # TODO https://github.com/jmorganca/ollama/blob/main/docs/api.md
+# Works with Ollama version >= 0.1.10
 
 class Ollama:
     """
@@ -65,9 +66,14 @@ class Ollama:
         """
         Create a model on the ollama server using a [Modelfile](https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md).\n
         `modelName` : The name of the new model to create.\n
-        `modelfile` : The path to your Modelfile.\n
+        `modelfile` : The content to your Modelfile.\n
         """
-        raise NotImplementedError
+        try:
+            parameters = {'name':modelname.lower(), 'modelfile':modelfile}
+            requests.post(f'{self.__baseUrl}/create', json=parameters)
+            return True
+        except:
+            return False
 
     # List Local Models
     def listLocalModels(self)->Union[str, None]:
@@ -96,10 +102,16 @@ class Ollama:
     #copy a model
     def copyModel(self, modelInput:str, modelOutput:str)->bool:
         """
-        # Forgot to implement\n
         Copy a model. Creates a model with another name from an existing model.
+        `modelInput` : The exact name of the model to copy. Including ":version" if applicable.\n
+        `modelOutput` : The name of the new model. If applicable.
         """
-        raise NotImplementedError
+        try:
+            parameters = {'source':modelInput, 'destination':modelOutput}
+            requests.post(f'{self.__baseUrl}/copy', json=parameters)
+            return True
+        except:
+            return False
 
     # Delete a Model
     def deleteModel(self, model:str)->bool:
