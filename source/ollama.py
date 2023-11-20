@@ -158,13 +158,25 @@ class Ollama:
         self.__pull()
 
     # Push a Model
-    def pushModel(self, model:str)->bool:
+    def pushModel(self, name:str, insecure:bool=False)->Union[str, None]:
         """
-        # NOT IMPLEMENTED\n
-        Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.\n
-        `model` : The name of the model to push.
+        Upload a model to a model library. Requires registering for ollama.ai and adding a public key first. [See how here.](https://github.com/jmorganca/ollama/blob/main/docs/import.md#publishing-your-model-optional--early-alpha)\n
+        `name` : Name of the model to push in the form of `<namespace>/<model>:<tag>`.\n
+        `insecure` (Optional) : Allow insecure connections to the library. Only use if you are pushing to your library during development.
         """
-        raise NotImplementedError
+        # Raise new error
+        parameters = {'name':name, 'stream':False, 'insecure':insecure}
+        try:
+            r = requests.post(f'{self.__baseUrl}/push', json=parameters)
+            if r.status_code == 200:
+                if r.encoding is None:
+                    r.encoding = 'utf-8'
+                if "success" in r.content.decode("utf-8"):
+                    return True
+                return False
+        except:
+            print("Error: Could not connect to ollama server")
+            return
 
     # Generate Embeddings
     def embeddings(self, prompt:str, model:str=None, options:dict[str,any]=None)->Union[str, None]:
